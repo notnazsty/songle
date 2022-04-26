@@ -27,6 +27,7 @@ const Home: NextPage = () => {
         window.open('http://localhost:3000/', '_self')
     }, [])
 
+    
 
     return (
         <VStack>

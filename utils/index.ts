@@ -1,2 +1,2 @@
 export * from './spotify'
-export * from './filtering'
+export * from './game'

@@ -1,38 +1,63 @@
-import { Search2Icon } from '@chakra-ui/icons'
-import { HStack, Input, InputGroup, InputLeftElement } from '@chakra-ui/react'
-import Fuse from 'fuse.js'
-import React, { useState } from 'react'
+import { Search2Icon } from "@chakra-ui/icons";
+import { HStack, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
+import Fuse from "fuse.js";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Game, Song } from "../../models";
 
-const Searchbar = (
-):JSX.Element => {
+interface SearchBarProps {
+  currentGame: Game;
+  songList: Song[];
+  setSongList: Dispatch<SetStateAction<Song[] | undefined>>;
+}
 
-  const [searchQuery, setSearchQuery] = useState("")
+const fuseOptions: Fuse.IFuseOptions<Song> = {
+  includeScore: true,
+  keys: ["name", "artists", "album", "releaseDate"],
+  threshold: 0.3,
+};
 
-  const songList: string[] = []
+const Searchbar = ({
+  songList,
+  setSongList,
+  currentGame,
+}: SearchBarProps): JSX.Element => {
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+    console.log(searchQuery);
+  };
 
-  const fuseOptions = {
-    includeScore: true,
-    keys: []
-  }
+  const fuse = useMemo(() => {
+    return new Fuse(currentGame.songOptions, fuseOptions);
+  }, [currentGame.songOptions]);
 
-  const fuse = new Fuse(songList, fuseOptions)
-
+  useEffect(() => {
+    if (searchQuery.trim() == "") {
+      setSongList(currentGame.songOptions);
+    } else {
+      const results = fuse.search(searchQuery).map((val) => val.item);
+      setSongList(results);
+    }
+  }, [currentGame.songOptions, fuse, searchQuery, setSongList]);
 
   return (
-    <HStack>
+    <HStack maxW="100%" w="5xl" px={16} color="white">
       <InputGroup>
         <InputLeftElement
           // eslint-disable-next-line react/no-children-prop
-          children={
-            <Search2Icon color='white' />
-          }
+          children={<Search2Icon color="white" />}
         />
-        <Input />
+        <Input value={searchQuery} onChange={handleChange} />
       </InputGroup>
-
     </HStack>
-  )
-}
+  );
+};
 
-export default Searchbar
+export default Searchbar;

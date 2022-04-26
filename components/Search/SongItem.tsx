@@ -20,6 +20,7 @@ const SongItem = ({
       justifyContent="space-between"
       w="100%"
       color={"white"}
+      py={{base:1, sm:2}}
       px={{ base: 2, sm: 4 }}
       textAlign="left"
       spacing={4}
@@ -33,9 +34,9 @@ const SongItem = ({
       <Image
         src={
           song.coverImages &&
-          song.coverImages[0] &&
-          song.coverImages[0].url
-            ? song.coverImages[0].url
+          song.coverImages[2] &&
+          song.coverImages[2].url
+            ? song.coverImages[2].url
             : "www.google.com" //replace with another placeholder
         }
         w={{ base: "75", md: "100" }}
