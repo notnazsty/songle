@@ -31,7 +31,6 @@ const Searchbar = ({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
-    console.log(searchQuery);
   };
 
   const fuse = useMemo(() => {

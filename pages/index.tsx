@@ -1,15 +1,8 @@
-import {
-  Button,
-  HStack,
-  Spinner,
-  VStack,
-  Image,
-  Tooltip,
-  Text,
-} from "@chakra-ui/react";
+import { Button, HStack, Spinner, VStack, Image } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import CardSlide from "../components/Game/CardSlide";
 import SongList from "../components/Search/SongList";
 import { AuthToken, Game, PlayerData, PlayerProfile, Song } from "../models";
 import { loadCurrentGame } from "../utils";
@@ -19,24 +12,26 @@ import { loginURL } from "../utils/spotify/spotifyRequests";
 const Home: NextPage = () => {
   const [authToken, setAuthToken] = useState<AuthToken>();
   const [songList, setSongList] = useState<Song[]>();
+  const [currentGuess, setCurrentGuess] = useState<Song>();
   const [playerData, setPlayerData] = useState<PlayerData>();
   const [currentGame, setCurrentGame] = useState<Game>();
   const [isLoading, setIsLoading] = useState(false);
 
-  //Pulling authToken from localStorage and updating it if necessary (make this only reload the page once)
   useEffect(() => {
     const localAuthToken: string | null = localStorage.getItem("authToken");
     if (localAuthToken) {
       const authTokenObj: AuthToken = JSON.parse(localAuthToken);
       if (
-        new Date(authTokenObj.createdAt).getTime() + authTokenObj.duration >
+        new Date(authTokenObj.createdAt).getTime() + authTokenObj.duration <
         new Date().getTime()
       ) {
-        window.location.reload();
+        console.log(new Date(authTokenObj.createdAt).getTime() + authTokenObj.duration*60,
+        new Date().getTime())
+        // window.open(loginURL, "_self");
       }
       setAuthToken(authTokenObj);
     }
-  }, [authToken]);
+  }, []);
 
   useEffect(() => {
     const playerDataString: string | null = localStorage.getItem("playerData");
@@ -46,7 +41,7 @@ const Home: NextPage = () => {
 
       const currentGame = loadCurrentGame();
       setSongList(currentGame.songOptions);
-      localStorage.setItem('currentGame', JSON.stringify(currentGame));
+      localStorage.setItem("currentGame", JSON.stringify(currentGame));
       setCurrentGame(currentGame);
     }
   }, []);
@@ -94,11 +89,14 @@ const Home: NextPage = () => {
         </HStack>
       )}
 
-      {songList && !isLoading && currentGame &&  (
+      {songList && !isLoading && currentGame && (
         <SongList
           songList={songList}
           setSongList={setSongList}
           currentGame={currentGame}
+          setCurrentGame={setCurrentGame}
+          setCurrentGuess={setCurrentGuess}
+          currentGuess={currentGuess}
         />
       )}
     </VStack>

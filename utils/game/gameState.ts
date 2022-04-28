@@ -1,5 +1,3 @@
-import { randomUUID } from "crypto";
-import { platform } from "os";
 import { Game, PlayerData, Song } from "../../models";
 
 export const loadCurrentGame = (): Game => {
@@ -19,7 +17,8 @@ const createNewGame = (): Game => {
     const newGame: Game = {
         songOptions: songs,
         songsGuessed: [],
-        correctSong: song
+        correctSong: song,
+        gameState: 'In Progress'
     }
     return newGame;
 }

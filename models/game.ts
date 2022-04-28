@@ -13,12 +13,15 @@ export interface PlayerProfile {
 export interface Game{
     songOptions: Song[],
     songsGuessed: Song[],
-    correctSong: Song
+    correctSong: Song,
+    gameState: GameState;
 }
 
+export type GameState = 'Win' | 'Loss' | 'In Progress';
 
 export interface PlayerData {
   profile: PlayerProfile;
   savedTracks: Song[];
   gamesPlayed: number;
 }
+

@@ -1,26 +1,39 @@
-import { 
-  Box, 
-  HStack, 
-  Image, 
-  Stack, 
-  Text,
-} from "@chakra-ui/react";
-import React from "react";
-import { Song } from "../../models";
+import { Box, HStack, Image, Stack, Text } from "@chakra-ui/react";
+import React, { Dispatch, SetStateAction } from "react";
+// import { LazyLoadImage } from "react-lazy-load-image-component";
+import { Game, Song } from "../../models";
 
-interface SongItemProps{
- song: Song
+interface SongItemProps {
+  song: Song;
+  currentGame: Game;
+  setCurrentGame: Dispatch<SetStateAction<Game | undefined>>;
 }
 
 const SongItem = ({
-  song
+  song,
+  setCurrentGame,
+  currentGame,
 }: SongItemProps): JSX.Element => {
+
+  //TODO update the state of the game based on guesses
+  const updateGameState = () => {
+    const newGameState: Game = {
+      songOptions: currentGame.songOptions,
+      songsGuessed: [...currentGame.songsGuessed, song],
+      correctSong: currentGame.correctSong,
+      gameState: "Win",
+    };
+    setCurrentGame(newGameState);
+    localStorage.setItem("currentGame", JSON.stringify(newGameState));
+    // TODO need to update playerData 
+  };
+
   return (
     <HStack
       justifyContent="space-between"
       w="100%"
       color={"white"}
-      py={{base:1, sm:2}}
+      py={{ base: 1, sm: 2 }}
       px={{ base: 2, sm: 4 }}
       textAlign="left"
       spacing={4}
@@ -29,13 +42,12 @@ const SongItem = ({
       _hover={{ bgColor: "#2A2A2A" }}
       cursor="pointer"
       onClick={() => {
+        updateGameState();
       }}
     >
       <Image
         src={
-          song.coverImages &&
-          song.coverImages[2] &&
-          song.coverImages[2].url
+          song.coverImages && song.coverImages[2] && song.coverImages[2].url
             ? song.coverImages[2].url
             : "www.google.com" //replace with another placeholder
         }
@@ -46,6 +58,18 @@ const SongItem = ({
         borderColor={"white"}
         mr={{ base: 2, sm: 8 }}
       />
+      {/* 
+        NOTICE: Did not notice a huge boost in performance from using a lazy load
+      <LazyLoadImage
+        alt={song.name}
+        width={{ base: 75, md: 100 }}
+        height={{ base: 75, md: 100 }}
+        src={song.coverImages[2].url}
+        treshold={150}
+        border={"1px"}
+        borderColor={"white"}
+        mr={{ base: 2, sm: 8 }}
+      /> */}
       <Stack
         direction={{ base: "column", sm: "row" }}
         spacing={{ base: 0, sm: 4 }}

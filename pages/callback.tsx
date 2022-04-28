@@ -6,6 +6,8 @@ import { AuthToken } from '../models'
 
 const Home: NextPage = () => {
 
+    const webURI = process.env.NEXT_PUBLIC_WEB_URI;
+
     useEffect(() => {
         const userToken = window.location.hash.substring(
             window.location.hash.indexOf('token=') + 6,
@@ -24,7 +26,7 @@ const Home: NextPage = () => {
 
         localStorage.setItem('authToken', JSON.stringify(authToken))
 
-        window.open('http://localhost:3000/', '_self')
+        window.open(webURI, '_self')
     }, [])
 
     

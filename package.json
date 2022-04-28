@@ -17,9 +17,11 @@
     "cross-env": "^7.0.3",
     "framer-motion": "^6.2.8",
     "fuse.js": "^6.5.3",
-    "next": "12.1.4",
-    "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "next": "^12.1.5",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-lazy-load-image-component": "^1.5.4",
+    "swiper": "^8.1.4"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
