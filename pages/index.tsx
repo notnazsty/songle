@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Box } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 
 import Navbar from "../components/Navbar/Navbar";
 import WelcomeScreen from "../components/Welcome/WelcomeScreen";
@@ -10,12 +10,20 @@ import useGameStore from "../stores/game";
 import PlaylistSelector from "../components/PlaylistSelector/PlaylistSelector";
 import Game from "../components/Game/Game";
 import EndScreen from "../components/End/EndScreen";
+import { getSongLyrics } from "../utils/genius";
+import { getUserSpotifyPlaylists } from "../utils";
 
 const Home: NextPage = () => {
   const [initialRender, setInitialRender] = useState(false);
 
   const authToken = usePlayerStore((state) => state.authToken);
+  
   const gameState = useGameStore((state) => state.gameState);
+
+
+  useEffect(() => {
+    console.log(authToken)
+  }, [authToken])
 
   useEffect(() => {
     setInitialRender(true);

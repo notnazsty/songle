@@ -1,9 +1,23 @@
 import axios, { AxiosResponse } from "axios";
-import { SpotifyProfileRequestResponse, SpotifyRequestError, SpotifyProfileData, Song, SpotifyLibrarySongsData, SpotifySongData, SimplifiedPlaylistData, SpotifyUserPlaylists, SpotifyPlaylistItem, SpotifyUserPlaylistSongs, SpotifyPlaylistSongItem } from "../../models";
-
+import { Dispatch, SetStateAction } from "react";
+import {
+  transformAxiosResToPlaylistSongs,
+  transformAxiosResToSimplifiedPlaylistItems,
+  transformSpotifyResponseToSongObject,
+} from ".";
+import {
+  SpotifyProfileRequestResponse,
+  SpotifyRequestError,
+  SpotifyProfileData,
+  Song,
+  SpotifyLibrarySongsData,
+  SimplifiedPlaylistData,
+  SpotifyUserPlaylists,
+  SpotifyUserPlaylistSongs,
+} from "../../models";
+import usePlaylistStore from "../../stores/playlists";
 
 const clientID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
-const redirectURI = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI;
 const webURI = process.env.NEXT_PUBLIC_WEB_URI;
 
 const authEndpoint = "https://accounts.spotify.com/authorize";
@@ -39,8 +53,10 @@ export const getSpotifyData = async (
   return Promise.resolve(data);
 };
 
+// requests are being repeated???
+
 export const getUserSpotifyLibrarySongs = async (
-  authToken: string
+  authToken: string,
 ): Promise<Song[]> => {
   let librarySongs: Song[] = [];
 
@@ -66,6 +82,9 @@ export const getUserSpotifyLibrarySongs = async (
     ...transformSpotifyResponseToSongObject(response.data.items)
   );
 
+
+  // Uncomment when releasing b/c I have ~5000 songs saved
+
   // while (typeof response.data.next === "string") {
   //   response = await axios.get(response.data.next, {
   //     headers: {
@@ -82,28 +101,12 @@ export const getUserSpotifyLibrarySongs = async (
   //   librarySongs.push(
   //     ...transformSpotifyResponseToSongObject(response.data.items)
   //   );
+  //   setCurrentSongNumLoading(
+  //     currentSongNumLoading + response.data.items.length
+  //   );
   // }
 
   return Promise.resolve(librarySongs);
-};
-
-const transformSpotifyResponseToSongObject = (
-  items: SpotifySongData[]
-): Song[] => {
-  let songsFromSelection: Song[] = [];
-
-  items.forEach((item: SpotifySongData) => {
-    const songObject: Song = {
-      name: item.track.name,
-      coverImages: item.track.album.images.map((imageObj) => imageObj),
-      album: item.track.album.name,
-      releaseDate: new Date(item.track.album.release_date),
-      artists: item.track.artists.map((artist) => artist.name),
-    };
-    songsFromSelection.push(songObject);
-  });
-
-  return songsFromSelection;
 };
 
 // Getting Users Playlists
@@ -155,26 +158,7 @@ export const getUserSpotifyPlaylists = async (
   return Promise.resolve(simplifiedPlaylistItems);
 };
 
-const transformAxiosResToSimplifiedPlaylistItems = (
-  items: SpotifyPlaylistItem[]
-): SimplifiedPlaylistData[] => {
-  let simplifiedPlaylistItems: SimplifiedPlaylistData[] = [];
-
-  items.forEach((playlist: SpotifyPlaylistItem) => {
-    const simplifiedPlaylistData: SimplifiedPlaylistData = {
-      name: playlist.name,
-      count: playlist.tracks.total,
-      id: playlist.id,
-      playlistCover: playlist.images,
-    };
-    simplifiedPlaylistItems.push(simplifiedPlaylistData);
-  });
-
-  return simplifiedPlaylistItems;
-};
-
 // Getting songs from a playlist
-
 export const getSongsFromSpotifyPlaylistWithID = async (
   playlistID: string,
   accessToken: string
@@ -225,23 +209,4 @@ export const getSongsFromSpotifyPlaylistWithID = async (
   }
 
   return Promise.resolve(songsFromPlaylist);
-};
-
-const transformAxiosResToPlaylistSongs = (
-  items: SpotifyPlaylistSongItem[]
-): Song[] => {
-  let songsFromSelection: Song[] = [];
-
-  items.forEach((item: SpotifyPlaylistSongItem) => {
-    const songObject: Song = {
-      name: item.track.name,
-      coverImages: item.track.album.images.map((imageObj) => imageObj),
-      album: item.track.album.name,
-      releaseDate: new Date(item.track.album.release_date),
-      artists: item.track.artists.map((artist) => artist.name),
-    };
-    songsFromSelection.push(songObject);
-  });
-
-  return songsFromSelection;
 };

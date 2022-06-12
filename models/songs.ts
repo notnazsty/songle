@@ -34,3 +34,11 @@ export interface CompareArrayResponse{
   differences: string[];
 }
 
+export interface CombinedPlaylistLibrary {
+  name: string;
+  total: number;
+  id?: string;
+  playlistCover: SpotifyImageObject[] | string;
+  savedTracks: Song[];
+}
+

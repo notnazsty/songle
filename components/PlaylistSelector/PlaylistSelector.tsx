@@ -1,8 +1,9 @@
-import { VStack, Text, HStack, Grid } from "@chakra-ui/react";
-import React from "react";
+import { VStack, Text, HStack, Grid, Image } from "@chakra-ui/react";
+import React, { useEffect } from "react";
 import { Game, Song } from "../../models";
 import useGameStore from "../../stores/game";
 import usePlayerStore from "../../stores/player";
+import usePlaylistStore from "../../stores/playlists";
 
 const PlaylistSelector = () => {
 
@@ -12,6 +13,15 @@ const PlaylistSelector = () => {
   const setSongList = useGameStore(state => state.setSongList);
   const setSongOptions = useGameStore(state => state.setSongOptions);
   const setSongsGuessed = useGameStore(state => state.setSongsGuessed);
+
+  const playlists = usePlaylistStore((state) => state.playlists);
+
+  useEffect(() => {
+    console.log(playlists)
+  
+    
+  }, [playlists] )
+  
 
 
   const createNewGame = (savedTracks: Song[]) => {
@@ -25,12 +35,12 @@ const PlaylistSelector = () => {
     setGameState("In Progress");
     // createLocalGameRoundData();
   };
-  
+
   const getRandomSong = (songs: Song[]): Song => {
     const randomNum = Math.floor(Math.random() * songs.length - 1);
     return songs[randomNum];
   };
-  
+
   const getLimitedSongs = (savedTracks: Song[], range: number): Song[] => {
     if (savedTracks) {
       if (savedTracks.length > range) {
@@ -45,15 +55,20 @@ const PlaylistSelector = () => {
     }
     return [];
   };
-    
+
+  // TODO ADD SWIPER INFINIT LOOP CAROUSEL
+
   return (
     <VStack>
       <Text fontSize={"2xl"}>Choose a playlist</Text>
-      <Grid templateColumns={{base: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(5, 1fr)"}}>
-        <HStack as="button" border={"1px"} p={6} onClick={() => createNewGame(savedTracks)}>
-          <Text>Saved Tracks</Text>
-        </HStack>
+      <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(5, 1fr)" }}>
+       
+        {playlists.map((playlist, i) => (<Image key={i} src={typeof playlist.playlistCover === "string" ? playlist.playlistCover : playlist.playlistCover[1].url} alt={playlist.name} />))}
+
       </Grid>
+      <HStack as="button" border={"1px"} p={2} rounded='25' onClick={() => createNewGame(savedTracks)}>
+        <Text> Start New Game </Text>
+      </HStack>
     </VStack>
   );
 };

@@ -3,7 +3,7 @@ import { devtools, persist } from "zustand/middleware"
 import { AuthToken, PlayerData, PlayerProfile, Song, SpotifyImageObject } from "../models"
 
 interface PlayerStoreState extends PlayerProfile, PlayerData, AuthToken {
-  setAuthToken: (token: AuthToken["authToken"] | null) => void;
+  setAuthToken: (token: string | null) => void;
   setAuthCreatedAt: (createdAt: AuthToken["authCreatedAt"] | null) => void;
   setAuthDuration: (duration: AuthToken["authDuration"] | null) => void;
   setAuthService: (service: AuthToken["authService"] | null) => void;
@@ -42,6 +42,6 @@ const usePlayerStore = create<PlayerStoreState>()(devtools(persist((set) => ({
   setAuthDuration: (authDuration) => set({authDuration}),
   setAuthService: (authService) => set({authService}),
   reset: () => set({...defaults})
-}))))
+}), {name: "players"})))
 
 export default usePlayerStore;

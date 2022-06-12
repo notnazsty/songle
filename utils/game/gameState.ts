@@ -109,19 +109,15 @@ export const updateLocalGameRoundData = (roundData: GameRoundData) => {
     );
 
     const artistsDifferences = new Set(
-        ...gameRound.differences.artists,
-        ...roundData.differences.artists
-    )
+      ...gameRound.differences.artists,
+      ...roundData.differences.artists
+    );
 
     //Fix this
     // const releaseDifferences = new Set(
     //     ...gameRound.differences.releaseDate,
     //     ...roundData.differences.artists
     // )
-
-   
-
- 
 
     const newGameData: GameRoundData = {
       matches: {

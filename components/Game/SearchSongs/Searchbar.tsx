@@ -9,7 +9,7 @@ import useGameStore from "../../../stores/game";
 const fuseOptions: Fuse.IFuseOptions<Song> = {
   includeScore: true,
   keys: ["name", "artists", "album", "releaseDate"],
-  threshold: 0.3,
+  threshold: 0.5,
 };
 
 const Searchbar = (): JSX.Element => {

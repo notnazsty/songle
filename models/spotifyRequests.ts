@@ -1,3 +1,5 @@
+import { Song } from "./songs";
+
 export interface AuthToken {
   authService: "Spotify" | "Apple" | null; // Apple Support In The Future?
   authToken: string | null;
@@ -98,6 +100,7 @@ export interface SpotifySongData {
 }
 
 export interface SpotifyLibrarySongsData {
+  map(arg0: (song: any) => any): Song[];
   href: string;
   items: SpotifySongData[];
   limit: number;
@@ -126,7 +129,7 @@ export interface SpotifyUserPlaylistsRequestResponse {
 
 export interface SimplifiedPlaylistData {
   name: string;
-  count: number;
+  total: number;
   id: string;
   playlistCover: SpotifyImageObject[];
 }
@@ -207,3 +210,4 @@ export interface SpotifyUserPlaylistsSongsRequestResponse {
   error?: SpotifyRequestError;
   success?: SpotifyUserPlaylistSongs;
 }
+
