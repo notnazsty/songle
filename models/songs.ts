@@ -4,7 +4,7 @@ export interface Song {
   name: string;
   album: string;
   artists: string[];
-  releaseDate: Date;
+  releaseDate: string;
   coverImages: SpotifyImageObject[];
 }
 

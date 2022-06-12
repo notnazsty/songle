@@ -12,7 +12,7 @@ import React, { useMemo } from "react";
 import useGameStore from "../../../stores/game";
 
 const GameInfo = () => {
-  const gameState = useGameStore((state) => state.gameState);
+  const hint = useGameStore((state) => state.hint);
   const songsGuessed = useGameStore((state) => state.songsGuessed);
   const numOfSongsGuessed = useMemo(() => songsGuessed.length, [songsGuessed]);
   const MAX_GUESSES = 6;
@@ -47,8 +47,28 @@ const GameInfo = () => {
         } guesses remaining`}</Text>
       </VStack>
       <VStack align={"start"}>
-        <Text fontWeight={"bold"}>Similarities</Text>
-        <Text color="gray.300">The similarities between your guesses and the correct answer will appear here.</Text>
+        <Text fontWeight={"bold"}>Hints</Text>
+        {!hint && (
+          <Text color="gray.300">
+            Hints based on the similarities between your guesses and the
+            correct answer will appear here.
+          </Text>
+        )}
+        {hint && hint.name.length > 0 && (
+          <VStack>
+            <Text>Name: {hint.name.join(", ")}</Text>
+          </VStack>
+        )}
+        {hint && hint.album.length > 0 && (
+          <VStack>
+            <Text>Album: {hint.album.join(", ")}</Text>
+          </VStack>
+        )}
+        {hint && hint.artists.length > 0 && (
+          <VStack>
+            <Text>Artists: {hint.artists.join(", ")}</Text>
+          </VStack>
+        )}
       </VStack>
     </VStack>
   );

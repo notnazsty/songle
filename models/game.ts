@@ -24,11 +24,17 @@ export interface PlayerData {
   gamesPlayed: number;
 }
 
+export interface SongSimilarity {
+  name: string[];
+  album: string[];
+  artists: string[];
+}
+
 export interface GameRoundData {
   matches: {
     name: string[];
     album: string[];
-    releaseDate?: number
+    releaseDate?: number | null;
     artists: string[];
   };
   differences: {

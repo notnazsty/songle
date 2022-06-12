@@ -13,7 +13,7 @@ const Game = () => {
           <Text flexShrink={0} mt={0} fontSize={"4xl"} fontWeight="bold" lineHeight={{lg: 0}}>
             Make a Guess!
           </Text>
-          <Box w="100%" maxW="xl">
+          <Box w="100%" maxW={{lg: "xl"}}>
             <Searchbar />
           </Box>
         </Stack>
