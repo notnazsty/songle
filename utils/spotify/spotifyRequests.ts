@@ -1,18 +1,10 @@
 import axios, { AxiosResponse } from "axios";
-import {
-  Song,
-  SpotifyLibrarySongRequestResponse,
-  SpotifyLibrarySongsData,
-  SpotifyProfileData,
-  SpotifyProfileRequestResponse,
-  SpotifyRequestError,
-  SpotifySongData,
-} from "../../models";
+import { SpotifyProfileRequestResponse, SpotifyRequestError, SpotifyProfileData, Song, SpotifyLibrarySongsData, SpotifySongData, SimplifiedPlaylistData, SpotifyUserPlaylists, SpotifyPlaylistItem, SpotifyUserPlaylistSongs, SpotifyPlaylistSongItem } from "../../models";
+
 
 const clientID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 const redirectURI = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI;
 const webURI = process.env.NEXT_PUBLIC_WEB_URI;
-
 
 const authEndpoint = "https://accounts.spotify.com/authorize";
 const scopes = ["user-read-private", "user-read-email", "user-library-read"];
@@ -21,6 +13,7 @@ export const loginURL = `${authEndpoint}?response_type=token&client_id=${clientI
   "%20"
 )}&redirect_uri=${webURI}callback/`;
 
+//Fix Later to use Promise.resolve() & Promise.reject()
 export const getSpotifyData = async (
   authToken: string
 ): Promise<SpotifyProfileRequestResponse> => {
@@ -43,76 +36,212 @@ export const getSpotifyData = async (
     success: "display_name" in response.data ? response.data : undefined,
   };
 
-  return data;
+  return Promise.resolve(data);
 };
 
 export const getUserSpotifyLibrarySongs = async (
   authToken: string
-): Promise<SpotifyLibrarySongRequestResponse> => {
+): Promise<Song[]> => {
   let librarySongs: Song[] = [];
 
   let response: AxiosResponse<
     SpotifyRequestError | SpotifyLibrarySongsData,
     any
-  > = await axios.get("https://api.spotify.com/v1/me/tracks?market=ES&limit=50&offset=0", {
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + authToken,
-    },
-  });
+  > = await axios.get(
+    "https://api.spotify.com/v1/me/tracks?market=ES&limit=50&offset=0",
+    {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + authToken,
+      },
+    }
+  );
 
   if ("error" in response.data) {
-    return {
-      error: {
-        error: response.data.error,
-      },
-    };
+    return Promise.reject(response.data.error);
   }
 
   librarySongs.push(
     ...transformSpotifyResponseToSongObject(response.data.items)
   );
 
-  while ("next" in response.data && response.data.next != null) {
+  // while (typeof response.data.next === "string") {
+  //   response = await axios.get(response.data.next, {
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //       Authorization: "Bearer " + authToken,
+  //     },
+  //   });
+
+  //   if ("error" in response.data) {
+  //     return Promise.resolve(librarySongs);
+  //   }
+
+  //   librarySongs.push(
+  //     ...transformSpotifyResponseToSongObject(response.data.items)
+  //   );
+  // }
+
+  return Promise.resolve(librarySongs);
+};
+
+const transformSpotifyResponseToSongObject = (
+  items: SpotifySongData[]
+): Song[] => {
+  let songsFromSelection: Song[] = [];
+
+  items.forEach((item: SpotifySongData) => {
+    const songObject: Song = {
+      name: item.track.name,
+      coverImages: item.track.album.images.map((imageObj) => imageObj),
+      album: item.track.album.name,
+      releaseDate: new Date(item.track.album.release_date),
+      artists: item.track.artists.map((artist) => artist.name),
+    };
+    songsFromSelection.push(songObject);
+  });
+
+  return songsFromSelection;
+};
+
+// Getting Users Playlists
+
+export const getUserSpotifyPlaylists = async (
+  accessToken: string
+): Promise<SimplifiedPlaylistData[]> => {
+  let simplifiedPlaylistItems: SimplifiedPlaylistData[] = [];
+
+  let response: AxiosResponse<SpotifyRequestError | SpotifyUserPlaylists, any> =
+    await axios.get(
+      ` https://api.spotify.com/v1/me/playlists?offset=0&limit=1`,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + accessToken,
+        },
+      }
+    );
+
+  if ("error" in response.data) {
+    return Promise.reject(response.data.error);
+  }
+
+  simplifiedPlaylistItems.push(
+    ...transformAxiosResToSimplifiedPlaylistItems(response.data.items)
+  );
+
+  while (typeof response.data.next === "string") {
     response = await axios.get(response.data.next, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: "Bearer " + authToken,
+        Authorization: "Bearer " + accessToken,
       },
     });
 
+    // Incase you hit an API rate limit it will just return all the songs that you already got
     if ("error" in response.data) {
-      break;
+      return Promise.resolve(simplifiedPlaylistItems);
     }
 
-    librarySongs.push(
-      ...transformSpotifyResponseToSongObject(response.data.items)
+    simplifiedPlaylistItems.push(
+      ...transformAxiosResToSimplifiedPlaylistItems(response.data.items)
     );
   }
 
-  return {
-    success: librarySongs,
-  };
+  return Promise.resolve(simplifiedPlaylistItems);
 };
 
-const transformSpotifyResponseToSongObject = (
-  response: SpotifySongData[]
-): Song[] => {
-  let arr: Song[] = [];
+const transformAxiosResToSimplifiedPlaylistItems = (
+  items: SpotifyPlaylistItem[]
+): SimplifiedPlaylistData[] => {
+  let simplifiedPlaylistItems: SimplifiedPlaylistData[] = [];
 
-  for (let i = 0; i < response.length; i++) {
-    const songObj: Song = {
-      name: response[i].track.name,
-      album: response[i].track.album.name,
-      artists: response[i].track.artists.map((artist) => artist.name),
-      releaseDate: new Date(response[i].track.album.release_date),
-      coverImages: response[i].track.album.images.map((image) => image),
+  items.forEach((playlist: SpotifyPlaylistItem) => {
+    const simplifiedPlaylistData: SimplifiedPlaylistData = {
+      name: playlist.name,
+      count: playlist.tracks.total,
+      id: playlist.id,
+      playlistCover: playlist.images,
     };
-    arr.push(songObj);
-  }
-  return arr;
+    simplifiedPlaylistItems.push(simplifiedPlaylistData);
+  });
+
+  return simplifiedPlaylistItems;
 };
 
+// Getting songs from a playlist
 
+export const getSongsFromSpotifyPlaylistWithID = async (
+  playlistID: string,
+  accessToken: string
+): Promise<Song[]> => {
+  let songsFromPlaylist: Song[] = [];
+
+  let response: AxiosResponse<
+    SpotifyRequestError | SpotifyUserPlaylistSongs,
+    any
+  > = await axios.get(
+    `https://api.spotify.com/v1/playlists/${encodeURI(
+      playlistID
+    )}/tracks?market=ES&limit=50&offset=0`,
+    {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + accessToken,
+      },
+    }
+  );
+
+  if ("error" in response.data) {
+    return Promise.reject(response.data.error);
+  }
+
+  songsFromPlaylist.push(
+    ...transformAxiosResToPlaylistSongs(response.data.items)
+  );
+
+  while (typeof response.data.next === "string") {
+    response = await axios.get(response.data.next, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + accessToken,
+      },
+    });
+
+    // Incase you hit an API rate limit it will just return all the songs that you already got
+    if ("error" in response.data) {
+      return Promise.resolve(songsFromPlaylist);
+    }
+
+    songsFromPlaylist.push(
+      ...transformAxiosResToPlaylistSongs(response.data.items)
+    );
+  }
+
+  return Promise.resolve(songsFromPlaylist);
+};
+
+const transformAxiosResToPlaylistSongs = (
+  items: SpotifyPlaylistSongItem[]
+): Song[] => {
+  let songsFromSelection: Song[] = [];
+
+  items.forEach((item: SpotifyPlaylistSongItem) => {
+    const songObject: Song = {
+      name: item.track.name,
+      coverImages: item.track.album.images.map((imageObj) => imageObj),
+      album: item.track.album.name,
+      releaseDate: new Date(item.track.album.release_date),
+      artists: item.track.artists.map((artist) => artist.name),
+    };
+    songsFromSelection.push(songObject);
+  });
+
+  return songsFromSelection;
+};

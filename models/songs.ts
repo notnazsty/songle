@@ -1,15 +1,11 @@
+import { SpotifyImageObject } from "./spotifyRequests";
+
 export interface Song {
   name: string;
   album: string;
   artists: string[];
   releaseDate: Date;
-  coverImages: CoverImage[];
-}
-
-export interface CoverImage {
-  width: number;
-  url: string;
-  height: number;
+  coverImages: SpotifyImageObject[];
 }
 
 // TODO make this work lol

@@ -1,10 +1,13 @@
 import {
   CompareArrayResponse,
+  GameRoundData,
   Song,
   SongDifferences,
   SongMatches,
   SongMatchResponse,
 } from "../../models";
+
+// LOL MY COMPARE METHODS ARE COMPLETELY OFF KMS REDO EM
 
 /**
  * Returns a SongMatchResponse Object after comparing the properties of two different songs.
@@ -45,7 +48,7 @@ export const compareSongs = (
   return {
     isCorrect: isCorrect,
     matches: matches,
-    differences: differences
+    differences: differences,
   };
 };
 
@@ -73,7 +76,7 @@ const compareArtists = (songOne: Song, songTwo: Song): CompareArrayResponse => {
   const matches: string[] = [];
   const differences: string[] = [];
 
-  for (let i = 0; songTwo.artists.length; i++) {
+  for (let i = 0; i < songTwo.artists.length; i++) {
     if (songOne.artists.includes(songTwo.artists[i])) {
       matches.push(songTwo.artists[i]);
     } else {
@@ -124,7 +127,7 @@ const compareDates = (
 };
 
 // Overly engineered way to precheck if a song is a match
-const match = (songOne: Song, songTwo: Song): boolean => {
+export const match = (songOne: Song, songTwo: Song): boolean => {
   if (songOne.album == songTwo.album) {
     if (songOne.name == songTwo.name) {
       if (
@@ -141,4 +144,23 @@ const match = (songOne: Song, songTwo: Song): boolean => {
     }
   }
   return false;
+};
+
+export const applyFilter = (array: Song[], filterRules: GameRoundData): Song[] => {
+  let filteredArray = array;
+
+  // Name match filter
+  console.log('da',filterRules.matches.name)
+  if (filterRules.matches.name.length > 0) {
+    filteredArray = filteredArray.filter((song) => {
+      for (let i = 0; i < filterRules.matches.name.length; i++) {
+        if (!song.name.includes(filterRules.matches.name[i])) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }
+
+  return filteredArray;
 };
