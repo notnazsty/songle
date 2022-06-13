@@ -17,7 +17,7 @@ const Home: NextPage = () => {
   const [initialRender, setInitialRender] = useState(false);
 
   const authToken = usePlayerStore((state) => state.authToken);
-  
+
   const gameState = useGameStore((state) => state.gameState);
 
 
@@ -59,6 +59,7 @@ const Home: NextPage = () => {
         <meta name="description" content="Songle a music puzzle game." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <Navbar />
       {renderScreen()}
     </Box>

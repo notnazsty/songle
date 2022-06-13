@@ -65,6 +65,7 @@ const SongCard: React.FC<Props> = ({ song }) => {
 
   return (
     <HStack
+      w="100%"
       border="1px"
       borderColor={"gray.500"}
       rounded="md"

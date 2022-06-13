@@ -25,7 +25,7 @@ const Navbar = () => {
 
       <HStack spacing={6}>
         <HStack color="gray.400">
-          <Link>Github</Link>
+          <Link href='https://github.com/notnazsty/songle' isExternal>Github</Link>
         </HStack>
         {authToken && (
           <Menu>

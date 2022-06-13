@@ -1,90 +1,18 @@
-import axios, { AxiosResponse } from "axios";
-import cheerio from "cheerio";
+import axios from "axios";
+import { GeniusSearchRequestSearchQuery } from "../../models/geniusRequests";
 
-import {
-  AxiosGeniusSearchRequestResponse,
-  GeniusSearchRequestHit,
-  GeniusSearchRequestSearchQuery,
-} from "../../models/geniusRequests";
-import { getMatchPercentage } from "./utils";
-
-const accessToken = process.env.NEXT_PUBLIC_GENIUS_ACCESS_TOKEN;
+const webURI = process.env.NEXT_PUBLIC_WEB_URI;
 
 export const getSongLyrics = async (
   searchQueryObj: GeniusSearchRequestSearchQuery
 ): Promise<string> => {
-  if (typeof accessToken != "string")
-    return Promise.reject("Genius Access Token is undefined");
 
-  const searchQuery = searchQueryObj.name + " by " + searchQueryObj.artists[0];
+  let req = await fetch("/api/lyrics?query=" + encodeURI(searchQueryObj.name + " " + searchQueryObj.artists[0]))
+  const data = await req.json();
+  const songLyrics = data.lyrics;
 
-  console.log(searchQuery);
-
-  let response: AxiosResponse<AxiosGeniusSearchRequestResponse, any> =
-    await axios.get(
-      "https://api.genius.com/search?q=" +
-        encodeURI(searchQuery) +
-        encodeURI(`&access_token=${accessToken}`)
-    );
-
-  if (response.data.meta.status != 200) {
-    return Promise.reject(response.data.meta);
-  }
-
-  console.log(response);
-
-  const hits = response.data.response?.hits;
-  let songLink: string;
-
-  if (!hits || hits.length === 0) {
-    return Promise.reject(
-      `Search Query: ${searchQuery} did not return any results`
-    );
-  } else {
-    songLink = getBestMatch(hits, searchQueryObj).result.url;
-  }
-
-  // TO DO GET THE SONG LYRICS
-
-  // let lyricRes = await axios.get(songLink);
-
-  // console.log(lyricRes);
-
-  const $ = cheerio.load("PLACEHOLDER")
-
-  // Might need to do more checks to make it work
-
-   fetch(songLink,{
-   method: "GET",
-  //  mode: 'no-cors',
-
-  }).then(data => console.log(data)).catch(err => console.log(err));
-
-  const songLyrics: string = $('div[class="lyrics"]').text().trim();
-
-
-  return Promise.resolve(songLyrics);
+  return songLyrics[Math.floor(songLyrics.length * Math.random())];
 };
 
-const getBestMatch = (
-  hits: GeniusSearchRequestHit[],
-  searchQueryObj: GeniusSearchRequestSearchQuery
-): GeniusSearchRequestHit => {
-  let bestMatch: GeniusSearchRequestHit = hits[0];
 
-  if (hits.length === 1) {
-    return bestMatch;
-  }
-
-  let bestMatchPercentage: number = getMatchPercentage(hits[0], searchQueryObj);
-
-  for (let i = 1; i < hits.length; i++) {
-    const currentMatchPercentage = getMatchPercentage(hits[i], searchQueryObj);
-    if (currentMatchPercentage > bestMatchPercentage) {
-      bestMatch = hits[i];
-    }
-  }
-
-  return bestMatch;
-};
-
+// Store song lyrics in a object so I can keep grabbing more lines from the song

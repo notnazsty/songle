@@ -142,6 +142,7 @@ const Home: NextPage = () => {
         //   authDuration: parseInt(duration)
         // }
         setAuthToken(userToken);
+        
         saveSpotifyLibrarySongData(userToken, () => window.open(webURI, "_self"));
 
       } else {

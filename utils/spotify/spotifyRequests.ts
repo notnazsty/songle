@@ -85,26 +85,24 @@ export const getUserSpotifyLibrarySongs = async (
 
   // Uncomment when releasing b/c I have ~5000 songs saved
 
-  // while (typeof response.data.next === "string") {
-  //   response = await axios.get(response.data.next, {
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //       Authorization: "Bearer " + authToken,
-  //     },
-  //   });
+  while (typeof response.data.next === "string") {
+    response = await axios.get(response.data.next, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + authToken,
+      },
+    });
 
-  //   if ("error" in response.data) {
-  //     return Promise.resolve(librarySongs);
-  //   }
+    if ("error" in response.data) {
+      return Promise.resolve(librarySongs);
+    }
 
-  //   librarySongs.push(
-  //     ...transformSpotifyResponseToSongObject(response.data.items)
-  //   );
-  //   setCurrentSongNumLoading(
-  //     currentSongNumLoading + response.data.items.length
-  //   );
-  // }
+    librarySongs.push(
+      ...transformSpotifyResponseToSongObject(response.data.items)
+    );
+   
+  }
 
   return Promise.resolve(librarySongs);
 };

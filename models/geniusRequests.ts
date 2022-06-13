@@ -1,3 +1,4 @@
+
 export interface GeniusLyricObject {
   songLyrics: string;
   displayedLyrics: string;
@@ -6,7 +7,6 @@ export interface GeniusLyricObject {
 
 export interface GeniusSearchRequestSearchQuery {
   name: string;
-  album: string;
   artists: string[];
 }
 
