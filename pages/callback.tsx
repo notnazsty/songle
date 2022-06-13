@@ -3,13 +3,9 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  AuthToken,
   CombinedPlaylistLibrary,
-  PlayerData,
-  PlayerProfile,
   SimplifiedPlaylistData,
   Song,
-  SpotifyLibrarySongRequestResponse,
   SpotifyRequestError,
 } from "../models";
 import usePlayerStore from "../stores/player";

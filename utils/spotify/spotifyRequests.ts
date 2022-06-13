@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import { Dispatch, SetStateAction } from "react";
 import {
   transformAxiosResToPlaylistSongs,
   transformAxiosResToSimplifiedPlaylistItems,
@@ -15,7 +14,6 @@ import {
   SpotifyUserPlaylists,
   SpotifyUserPlaylistSongs,
 } from "../../models";
-import usePlaylistStore from "../../stores/playlists";
 
 const clientID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 const webURI = process.env.NEXT_PUBLIC_WEB_URI;

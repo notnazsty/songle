@@ -41,7 +41,7 @@ const GameInfo = () => {
       }).then((lyric) => { setLyricHint(lyric); console.log(lyric) }).catch((err) => console.log(err))
     }
 
-  }, [correctSong])
+  }, [correctSong, lyricHint])
 
 
   return (
