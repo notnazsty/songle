@@ -40,7 +40,7 @@ const PlaylistSelector = () => {
     <VStack w='100%' spacing={8}>
       <Text fontSize={"2xl"}>Choose a playlist</Text>
 
-      <InputGroup w='100%' maxW='5xl' borderColor={"gray.800"} bg="gray.900" rounded={"md"}>
+      <InputGroup w='100%' maxW={{base: 'xs', md: '5xl'}} borderColor={"gray.800"} bg="gray.900" rounded={"md"}>
         <InputLeftElement
           // eslint-disable-next-line react/no-children-prop
           children={<Search2Icon color="gray.00" />}

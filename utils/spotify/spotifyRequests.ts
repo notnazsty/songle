@@ -149,7 +149,7 @@ export const getUserSpotifyPlaylists = async (
 
   let response: AxiosResponse<SpotifyRequestError | SpotifyUserPlaylists, any> =
     await axios.get(
-      ` https://api.spotify.com/v1/me/playlists?offset=0&limit=1`,
+      ` https://api.spotify.com/v1/me/playlists?offset=0&limit=20`,
       {
         headers: {
           Accept: "application/json",
@@ -250,7 +250,7 @@ export const getSongsFromSpotifyPlaylistWithID = async (
       ...transformAxiosResToPlaylistSongs(response.data.items)
     );
 
-    if (totalLoaded >= 500) {
+    if (totalLoaded >= 250) {
       return Promise.resolve(songsFromPlaylist);
     }
   }
@@ -258,4 +258,57 @@ export const getSongsFromSpotifyPlaylistWithID = async (
   return Promise.resolve(songsFromPlaylist);
 };
 
-// Auth Requests
+// For fixes towards loading large playlists
+
+export const getSongsFromPlaylistIDStartingFrom = async (
+  playlistID: string,
+  accessToken: string,
+  position: number
+) => {
+  let songsFromPlaylist: Song[] = [];
+
+  let response: AxiosResponse<
+    SpotifyRequestError | SpotifyUserPlaylistSongs,
+    any
+  > = await axios.get(
+    `https://api.spotify.com/v1/playlists/${encodeURI(
+      playlistID
+    )}/tracks?market=ES&limit=50&offset=${position}`,
+    {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + accessToken,
+      },
+    }
+  );
+
+  if ("error" in response.data) {
+    return Promise.reject(response.data.error);
+  }
+
+  songsFromPlaylist.push(
+    ...transformAxiosResToPlaylistSongs(response.data.items)
+  );
+
+  while (typeof response.data.next === "string") {
+    response = await axios.get(response.data.next, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + accessToken,
+      },
+    });
+
+    // Incase you hit an API rate limit it will just return all the songs that you already got
+    if ("error" in response.data) {
+      return Promise.resolve(songsFromPlaylist);
+    }
+
+    songsFromPlaylist.push(
+      ...transformAxiosResToPlaylistSongs(response.data.items)
+    );
+  }
+
+  return Promise.resolve(songsFromPlaylist);
+};

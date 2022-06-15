@@ -74,15 +74,19 @@ const Home: NextPage = () => {
       for (let i = 0; i < userPlaylists.length; i++) {
         const playlist = userPlaylists[i];
         setCurrentPlaylistLoading(playlist.name)
-        const savedTracks: Song[] = await getSongsFromSpotifyPlaylistWithID(playlist.id, authToken, setCurrentSongNumLoading)
-        const currentPlaylist: CombinedPlaylistLibrary = {
-          name: playlist.name,
-          total: playlist.total,
-          playlistCover: playlist.playlistCover,
-          id: playlist.id,
-          savedTracks: savedTracks
-        };
-        newPlaylists.push(currentPlaylist);
+        try {
+          const savedTracks: Song[] = await getSongsFromSpotifyPlaylistWithID(playlist.id, authToken, setCurrentSongNumLoading)
+          const currentPlaylist: CombinedPlaylistLibrary = {
+            name: playlist.name,
+            total: playlist.total,
+            playlistCover: playlist.playlistCover,
+            id: playlist.id,
+            savedTracks: savedTracks
+          };
+          newPlaylists.push(currentPlaylist);
+        } catch (err) {
+          console.log(err)
+        }
       }
 
 
@@ -105,7 +109,7 @@ const Home: NextPage = () => {
         setEmail(playerSpotifyData.success.email);
         setProfileImage(playerSpotifyData.success.images[0]);
         setCountry(playerSpotifyData.success.country);
-        setSavedTracks(librarySavedTracks.map((song) => song)); //EXCEEDS QUOTA
+        // setSavedTracks(librarySavedTracks.map((song) => song)); //EXCEEDS QUOTA
         setGamesPlayed(0);
       }
 
@@ -115,7 +119,7 @@ const Home: NextPage = () => {
 
       callback();
     },
-    [setCountry, setCurrentPlaylistLoading, setCurrentSongNumLoading, setEmail, setGamesPlayed, setName, setPlaylists, setProfileImage, setSavedTracks, setTotalSongCount]
+    [setCountry, setCurrentPlaylistLoading, setCurrentSongNumLoading, setEmail, setGamesPlayed, setName, setPlaylists, setProfileImage, setTotalSongCount]
   );
 
   useEffect(() => {
@@ -155,24 +159,23 @@ const Home: NextPage = () => {
   }
 
   return (
-    <VStack bg={"black"} color="gray.300" minH="100vh" minW='100vw'>
+    <VStack bg={"black"} color="gray.300" minH="100vh" w='100%' alignItems={'center'}>
       <Head>
         <title>Songle</title>
         <meta name="callback" content="callback" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <VStack w='100%' height='100%'>
 
-        <Center width='lg' height='lg' display='flex' flexDirection='column'>
+        <Center width='100%' height='lg' display='flex' flexDirection='column'>
           <Heading color='white' size='xl' alignSelf='center'>Loading Your Songs </Heading>
         </Center>
 
-        <Text pt={8}> Loading {currentPlaylistLoading} </Text>
-        <Text> Song #{currentSongNumLoading} of {totalSongCount}</Text>
-        <Text> Some songs will be skipped from playlists if they are too long</Text>
+        <Text pt={8} > Loading {currentPlaylistLoading} </Text>
+        <Text textAlign={"center"}> Song #{currentSongNumLoading} of {totalSongCount}</Text>
+        <Text textAlign={"center"}> Some songs will be skipped from playlists if they are too long</Text>
 
         {totalSongCount > 0 && (
-          <Progress rounded={10} my='16px' colorScheme="green" height="20px" width='320px' value={currentSongNumLoading} max={totalSongCount} />
+          <Progress rounded={10} my='16px' colorScheme="green" height="20px" width='min(100%, 320px)' value={currentSongNumLoading} max={totalSongCount} />
         )}
 
         {totalSongCount == 0 && (
@@ -183,7 +186,6 @@ const Home: NextPage = () => {
 
       </VStack>
 
-    </VStack>
   );
 };
 
