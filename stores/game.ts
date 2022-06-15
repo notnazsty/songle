@@ -7,6 +7,8 @@ interface GameStoreState extends Game {
   gameRoundData: GameRoundData;
   hint: SongSimilarity | null,
   searchbarQuery: string;
+  currentSongLyrics: string;
+  setCurrentSongLyrics: (lyrics: string) => void;
   setSongList: (songList: Song[]) => void;
   setGameRoundData: (gameRoundData: GameRoundData) => void;
   setHint: (hint: SongSimilarity | null) => void;
@@ -18,7 +20,7 @@ interface GameStoreState extends Game {
   reset: () => void;
 }
 
-const defaults: Game & { songList: Song[]; gameRoundData: GameRoundData;  hint: SongSimilarity | null, searchbarQuery: string; } = {
+const defaults: Game & { songList: Song[]; gameRoundData: GameRoundData;  hint: SongSimilarity | null, searchbarQuery: string; currentSongLyrics: "" } = {
   songList: [],
   songOptions: [],
   songsGuessed: [],
@@ -26,6 +28,7 @@ const defaults: Game & { songList: Song[]; gameRoundData: GameRoundData;  hint: 
   gameState: "Not Started",
   hint: null,
   searchbarQuery: "",
+  currentSongLyrics: "",
   gameRoundData: {
     matches: {
       name: [],
@@ -53,6 +56,7 @@ const useGameStore = create<GameStoreState>()(
     setSongsGuessed: (songsGuessed) => set({ songsGuessed }),
     setCorrectSong: (correctSong) => set({ correctSong }),
     setGameState: (gameState) => set({ gameState }),
+    setCurrentSongLyrics: (currentSongLyrics) => set({currentSongLyrics}),
     reset: () => set({ ...defaults }),
   }))
 );

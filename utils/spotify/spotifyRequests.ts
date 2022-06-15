@@ -19,7 +19,12 @@ const clientID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 const webURI = process.env.NEXT_PUBLIC_WEB_URI;
 
 const authEndpoint = "https://accounts.spotify.com/authorize";
-const scopes = ["user-read-private", "user-read-email", "user-library-read"];
+const scopes = [
+  "user-read-private",
+  "user-read-email",
+  "user-library-read",
+  "playlist-read-private",
+];
 
 export const loginURL = `${authEndpoint}?response_type=token&client_id=${clientID}&scope=${scopes.join(
   "%20"
@@ -51,12 +56,38 @@ export const getSpotifyData = async (
   return Promise.resolve(data);
 };
 
-// requests are being repeated???
+export const getNumOfSpotifyLibrarySongsSaved = async (
+  authToken: string
+): Promise<number> => {
+  let total = 0;
+
+  let response: AxiosResponse<
+    SpotifyRequestError | SpotifyLibrarySongsData,
+    any
+  > = await axios.get(
+    "https://api.spotify.com/v1/me/tracks?market=ES&limit=1&offset=0",
+    {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + authToken,
+      },
+    }
+  );
+
+  if (!("error" in response.data)) {
+    total += response.data.total;
+  }
+
+  return Promise.resolve(total);
+};
 
 export const getUserSpotifyLibrarySongs = async (
   authToken: string,
+  setCurrentSongNumLoading: (fn: (count: number) => number) => void
 ): Promise<Song[]> => {
   let librarySongs: Song[] = [];
+  let countHelper: number = 0;
 
   let response: AxiosResponse<
     SpotifyRequestError | SpotifyLibrarySongsData,
@@ -76,10 +107,12 @@ export const getUserSpotifyLibrarySongs = async (
     return Promise.reject(response.data.error);
   }
 
+  countHelper = response.data.items.length;
+  setCurrentSongNumLoading((count) => count + countHelper);
+
   librarySongs.push(
     ...transformSpotifyResponseToSongObject(response.data.items)
   );
-
 
   // Uncomment when releasing b/c I have ~5000 songs saved
 
@@ -96,10 +129,12 @@ export const getUserSpotifyLibrarySongs = async (
       return Promise.resolve(librarySongs);
     }
 
+    countHelper = response.data.items.length;
+    setCurrentSongNumLoading((count) => count + countHelper);
+
     librarySongs.push(
       ...transformSpotifyResponseToSongObject(response.data.items)
     );
-   
   }
 
   return Promise.resolve(librarySongs);
@@ -157,9 +192,13 @@ export const getUserSpotifyPlaylists = async (
 // Getting songs from a playlist
 export const getSongsFromSpotifyPlaylistWithID = async (
   playlistID: string,
-  accessToken: string
+  accessToken: string,
+  setCurrentSongNumLoading: (fn: (count: number) => number) => void
 ): Promise<Song[]> => {
   let songsFromPlaylist: Song[] = [];
+  let countHelper: number = 0;
+
+  let totalLoaded = 0;
 
   let response: AxiosResponse<
     SpotifyRequestError | SpotifyUserPlaylistSongs,
@@ -181,6 +220,10 @@ export const getSongsFromSpotifyPlaylistWithID = async (
     return Promise.reject(response.data.error);
   }
 
+  countHelper = response.data.items.length;
+  setCurrentSongNumLoading((count) => count + countHelper);
+  totalLoaded += countHelper;
+
   songsFromPlaylist.push(
     ...transformAxiosResToPlaylistSongs(response.data.items)
   );
@@ -199,10 +242,20 @@ export const getSongsFromSpotifyPlaylistWithID = async (
       return Promise.resolve(songsFromPlaylist);
     }
 
+    countHelper = response.data.items.length;
+    setCurrentSongNumLoading((count) => count + countHelper);
+    totalLoaded += countHelper;
+
     songsFromPlaylist.push(
       ...transformAxiosResToPlaylistSongs(response.data.items)
     );
+
+    if (totalLoaded >= 500) {
+      return Promise.resolve(songsFromPlaylist);
+    }
   }
 
   return Promise.resolve(songsFromPlaylist);
 };
+
+// Auth Requests

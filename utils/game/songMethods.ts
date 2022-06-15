@@ -150,7 +150,6 @@ export const applyFilter = (array: Song[], filterRules: GameRoundData): Song[] =
   let filteredArray = array;
 
   // Name match filter
-  console.log('da',filterRules.matches.name)
   if (filterRules.matches.name.length > 0) {
     filteredArray = filteredArray.filter((song) => {
       for (let i = 0; i < filterRules.matches.name.length; i++) {

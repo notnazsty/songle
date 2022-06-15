@@ -1,7 +1,7 @@
-import { Button, VStack, Text, Heading, Center, Progress, Stack } from "@chakra-ui/react";
+import { VStack, Text, Heading, Center, Progress, Image, Spinner } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   CombinedPlaylistLibrary,
   SimplifiedPlaylistData,
@@ -11,6 +11,7 @@ import {
 import usePlayerStore from "../stores/player";
 import usePlaylistStore from "../stores/playlists"
 import {
+  getNumOfSpotifyLibrarySongsSaved,
   getSongsFromSpotifyPlaylistWithID,
   getSpotifyData,
   getUserSpotifyLibrarySongs,
@@ -47,7 +48,6 @@ const Home: NextPage = () => {
   const currentSongNumLoading = usePlaylistStore((state) => state.currentSongNumLoading);
   const setCurrentSongNumLoading = usePlaylistStore((state) => state.setCurrentSongNumLoading);
 
-  const playlists = usePlaylistStore((state) => state.playlists);
   const setPlaylists = usePlaylistStore((state) => state.setPlaylists);
 
   const saveSpotifyLibrarySongData = useCallback(
@@ -60,15 +60,21 @@ const Home: NextPage = () => {
 
       try {
         userPlaylists = await getUserSpotifyPlaylists(authToken);
-        console.log(userPlaylists)
       } catch (err) {
         console.log(err)
       }
 
+      let totalSongCount = 0;
+      for (let i = 0; i < userPlaylists.length; i++) {
+        totalSongCount += userPlaylists[i].total;
+      }
+      totalSongCount += await getNumOfSpotifyLibrarySongsSaved(authToken);
+      setTotalSongCount((count) => (totalSongCount));
+
       for (let i = 0; i < userPlaylists.length; i++) {
         const playlist = userPlaylists[i];
-        setTotalSongCount((count) => (count + playlist.total));
-        const savedTracks: Song[] = await getSongsFromSpotifyPlaylistWithID(playlist.id, authToken)
+        setCurrentPlaylistLoading(playlist.name)
+        const savedTracks: Song[] = await getSongsFromSpotifyPlaylistWithID(playlist.id, authToken, setCurrentSongNumLoading)
         const currentPlaylist: CombinedPlaylistLibrary = {
           name: playlist.name,
           total: playlist.total,
@@ -80,9 +86,9 @@ const Home: NextPage = () => {
       }
 
 
-      // Switch to .then() .catch() to catch errors and react to them
       try {
-        librarySavedTracks = await getUserSpotifyLibrarySongs(authToken);
+        setCurrentPlaylistLoading("Liked Tracks")
+        librarySavedTracks = await getUserSpotifyLibrarySongs(authToken, setCurrentSongNumLoading);
         newPlaylists.push({
           name: "Liked Tracks",
           total: librarySavedTracks.length,
@@ -104,17 +110,19 @@ const Home: NextPage = () => {
       }
 
       setPlaylists(newPlaylists);
+      setCurrentPlaylistLoading("")
+
 
       callback();
     },
-    [setCountry, setEmail, setGamesPlayed, setName, setPlaylists, setProfileImage, setSavedTracks, setTotalSongCount]
+    [setCountry, setCurrentPlaylistLoading, setCurrentSongNumLoading, setEmail, setGamesPlayed, setName, setPlaylists, setProfileImage, setSavedTracks, setTotalSongCount]
   );
 
   useEffect(() => {
     if (initialRender) {
       setTotalSongCount((_) => (0));
       setPlaylists([]);
-      setCurrentSongNumLoading(0);
+      setCurrentSongNumLoading((count) => (0));
 
       const userToken = window.location.hash.substring(
         window.location.hash.indexOf("token=") + 6,
@@ -131,14 +139,7 @@ const Home: NextPage = () => {
         typeof duration === "string" &&
         userToken !== ""
       ) {
-        // const authToken: AuthToken = {
-        //   authService: 'Spotify',
-        //   authToken: userToken,
-        //   authCreatedAt: (new Date()).getUTCMilliseconds(),
-        //   authDuration: parseInt(duration)
-        // }
         setAuthToken(userToken);
-        
         saveSpotifyLibrarySongData(userToken, () => window.open(webURI, "_self"));
 
       } else {
@@ -166,13 +167,19 @@ const Home: NextPage = () => {
           <Heading color='white' size='xl' alignSelf='center'>Loading Your Songs </Heading>
         </Center>
 
-        <Text> Loading {currentPlaylistLoading} </Text>
+        <Text pt={8}> Loading {currentPlaylistLoading} </Text>
         <Text> Song #{currentSongNumLoading} of {totalSongCount}</Text>
-
+        <Text> Some songs will be skipped from playlists if they are too long</Text>
 
         {totalSongCount > 0 && (
-          <Progress my='16px' colorScheme="green" height="20px" width='320px' value={currentSongNumLoading} max={totalSongCount} />
+          <Progress rounded={10} my='16px' colorScheme="green" height="20px" width='320px' value={currentSongNumLoading} max={totalSongCount} />
         )}
+
+        {totalSongCount == 0 && (
+          <Spinner size='lg' color='green.400' />
+        )}
+
+
 
       </VStack>
 

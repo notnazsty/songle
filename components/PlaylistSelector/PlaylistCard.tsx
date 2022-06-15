@@ -52,17 +52,10 @@ const PlaylistCard = ({
 
 
     return (
-
-        <VStack p={5} bg={'gray.900'} borderRadius={16} _hover={{ bg: 'gray.700', boxShadow: "lg" }} onClick={() => createNewGame(playlist.savedTracks)}>
-            <Box boxSize={48} pos="relative" overflow="hidden">
-                <Image src={typeof playlist.playlistCover === "string" ? playlist.playlistCover : playlist.playlistCover[1].url} alt={playlist.name} objectFit="contain" objectPosition="center" width={48 * 4} />
-            </Box>
-
-            <VStack spacing={0}>
-                <Text fontWeight="bold" fontSize="lg">{playlist.name}</Text>
-            </VStack>
+        <VStack bg={'gray.900'} borderRadius={16} w={"192px"} spacing={0} cursor="pointer" onClick={() => createNewGame(playlist.savedTracks)}>
+            <Box boxSize={48} pos="relative" overflow="hidden" bgImage={typeof playlist.playlistCover === "string" ? playlist.playlistCover : playlist.playlistCover[0].url} bgSize="contain" bgPos="center" />
+            <Text fontSize="lg" textAlign={"center"} px={1} py={3}>{playlist.name}</Text>
         </VStack>
-
     )
 }
 

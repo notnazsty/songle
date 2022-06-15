@@ -9,7 +9,7 @@ interface Playlists {
   playlists: CombinedPlaylistLibrary[];
   setTotalSongCount: (fn: (count: number) => number) => void;
   setCurrentPlaylistLoading: (playlistName: string) => void;
-  setCurrentSongNumLoading: (count: number) => void;
+  setCurrentSongNumLoading: (fn: (count: number) => number) => void;
   setPlaylists: (playlistsArr: CombinedPlaylistLibrary[]) => void;
   mergePlaylists: (fn: (playlist: CombinedPlaylistLibrary[]) => CombinedPlaylistLibrary[]) => void;
 }
@@ -33,8 +33,7 @@ const usePlaylistStore = create<Playlists>()(
       setTotalSongCount: (fn) => set(state => ({totalSongCount: fn(state.totalSongCount)})),
       setCurrentPlaylistLoading: (currentPlaylistLoading) =>
         set({ currentPlaylistLoading }),
-      setCurrentSongNumLoading: (currentSongNumLoading) =>
-        set({ currentSongNumLoading }),
+      setCurrentSongNumLoading: (fn) => set(state => ({currentSongNumLoading: fn(state.currentSongNumLoading)})),
       setPlaylists: (playlists) => set({ playlists }),
       mergePlaylists: (fn) => set(state => ({playlists: fn(state.playlists)})),
       reset: () => set({ ...defaults }),

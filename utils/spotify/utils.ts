@@ -1,57 +1,75 @@
-import { SpotifyPlaylistSongItem, Song, SimplifiedPlaylistData, SpotifyPlaylistItem, SpotifySongData } from "../../models";
+import {
+  SpotifyPlaylistSongItem,
+  Song,
+  SimplifiedPlaylistData,
+  SpotifyPlaylistItem,
+  SpotifySongData,
+} from "../../models";
 
 export const transformSpotifyResponseToSongObject = (
-    items: SpotifySongData[]
-  ): Song[] => {
-    let songsFromSelection: Song[] = [];
-  
-    items.forEach((item: SpotifySongData) => {
+  items: SpotifySongData[]
+): Song[] => {
+  let songsFromSelection: Song[] = [];
+
+  items.forEach((item: SpotifySongData) => {
+    if (item.track) {
       const songObject: Song = {
         name: item.track.name,
         coverImages: item.track.album.images.map((imageObj) => imageObj),
         album: item.track.album.name,
-        releaseDate: new Date(item.track.album.release_date).getFullYear().toString(),
+        releaseDate: new Date(item.track.album.release_date)
+          .getFullYear()
+          .toString(),
         artists: item.track.artists.map((artist) => artist.name),
       };
       songsFromSelection.push(songObject);
-    });
-  
-    return songsFromSelection;
-  };
+    } else {
+      console.log(item);
+    }
+  });
+
+  return songsFromSelection;
+};
 
 export const transformAxiosResToSimplifiedPlaylistItems = (
-    items: SpotifyPlaylistItem[]
-  ): SimplifiedPlaylistData[] => {
-    let simplifiedPlaylistItems: SimplifiedPlaylistData[] = [];
-  
-    items.forEach((playlist: SpotifyPlaylistItem) => {
-      const simplifiedPlaylistData: SimplifiedPlaylistData = {
-        name: playlist.name,
-        total: playlist.tracks.total,
-        id: playlist.id,
-        playlistCover: playlist.images,
-      };
-      simplifiedPlaylistItems.push(simplifiedPlaylistData);
-    });
-  
-    return simplifiedPlaylistItems;
-  };
+  items: SpotifyPlaylistItem[]
+): SimplifiedPlaylistData[] => {
+  let simplifiedPlaylistItems: SimplifiedPlaylistData[] = [];
+
+  items.forEach((playlist: SpotifyPlaylistItem) => {
+    const simplifiedPlaylistData: SimplifiedPlaylistData = {
+      name: playlist.name,
+      total: playlist.tracks.total,
+      id: playlist.id,
+      playlistCover: playlist.images,
+    };
+    simplifiedPlaylistItems.push(simplifiedPlaylistData);
+  });
+
+  return simplifiedPlaylistItems;
+};
 
 export const transformAxiosResToPlaylistSongs = (
-    items: SpotifyPlaylistSongItem[]
-  ): Song[] => {
-    let songsFromSelection: Song[] = [];
-  
-    items.forEach((item: SpotifyPlaylistSongItem) => {
+  items: SpotifyPlaylistSongItem[]
+): Song[] => {
+  let songsFromSelection: Song[] = [];
+
+  items.forEach((item: SpotifyPlaylistSongItem) => {
+    if (item.track) {
       const songObject: Song = {
         name: item.track.name,
         coverImages: item.track.album.images.map((imageObj) => imageObj),
         album: item.track.album.name,
-        releaseDate: new Date(item.track.album.release_date).getFullYear().toString(),
+        releaseDate: new Date(item.track.album.release_date)
+          .getFullYear()
+          .toString(),
         artists: item.track.artists.map((artist) => artist.name),
       };
       songsFromSelection.push(songObject);
-    });
-  
-    return songsFromSelection;
-  };
+    } else {
+      console.log(item);
+    }
+  });
+
+  return songsFromSelection;
+};

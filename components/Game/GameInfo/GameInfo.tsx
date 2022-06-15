@@ -1,18 +1,14 @@
 import { CloseIcon } from "@chakra-ui/icons";
 import {
-  AspectRatio,
-  Box,
-  Button,
   Center,
-  Divider,
   Grid,
-  HStack,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import React, { useEffect, useMemo, useState } from "react";
 import useGameStore from "../../../stores/game";
-import { getSongLyrics } from "../../../utils/genius";
+import { getInitialHint, getSongLyrics } from "../../../utils/genius";
 
 const GameInfo = () => {
 
@@ -22,6 +18,9 @@ const GameInfo = () => {
   const numOfSongsGuessed = useMemo(() => songsGuessed.length, [songsGuessed]);
   const MAX_GUESSES = 6;
 
+  const currentSongLyrics = useGameStore((state) => state.currentSongLyrics);
+  const setCurrentSongLyrics = useGameStore((state) => state.setCurrentSongLyrics)
+
   const guessBgColor = (i: number, numOfSongsGuessed: number) => {
     if (i < numOfSongsGuessed) {
       return "red.700";
@@ -30,18 +29,22 @@ const GameInfo = () => {
     }
   };
 
-  const [lyricHint, setLyricHint] = useState("");
+  const [songLyricHint, setSongLyricHint] = useState("")
 
   useEffect(() => {
-    if (correctSong && !lyricHint) {
-      console.log(correctSong)
+    if (correctSong && !currentSongLyrics) {
+      setCurrentSongLyrics(" ")
+
       getSongLyrics({
         name: correctSong.name,
         artists: correctSong.artists
-      }).then((lyric) => { setLyricHint(lyric); console.log(lyric) }).catch((err) => console.log(err))
+      }).then((lyric) => {
+        setCurrentSongLyrics(lyric);
+        setSongLyricHint(getInitialHint(lyric));
+      }).catch((err) => console.log(err))
     }
 
-  }, [correctSong, lyricHint])
+  }, [correctSong, currentSongLyrics, setCurrentSongLyrics])
 
 
   return (
@@ -65,19 +68,22 @@ const GameInfo = () => {
           } guesses remaining`}</Text>
       </VStack>
       <VStack align={"start"} spacing={4}>
+        {currentSongLyrics && !(currentSongLyrics.length > 2) && (
+          <Center w='100%'>
+            <Spinner size='md' color='orange' thickness="3px" />
+          </Center>
+        )}
 
-        {lyricHint && <VStack align={"start"} w='100%' justifyContent='space-between'>
-          <Text fontWeight={"bold"}> Lyrics: </Text>
-          <Text> {lyricHint} </Text>
-          <Button size='xs' colorScheme='green' onClick={() => {
-            if (correctSong) {
-              getSongLyrics({
-                name: correctSong.name,
-                artists: correctSong.artists
-              }).then((lyric) => { setLyricHint(lyric); console.log(lyric) }).catch((err) => console.log(err))
-            }
-          }}> Next</Button>
-        </VStack>}
+        {songLyricHint &&
+          <VStack align={"start"} w='100%' justifyContent='space-between'>
+            <Text fontWeight={"bold"}> Lyrics: </Text>
+            {songLyricHint.split("\n").map((l, i) => (<Text key={i}> {l} </Text>))}
+            {/* <Button size='xs' colorScheme='green' onClick={() => {
+              if (correctSong) {
+                setSongLyricHint(getNextHint(currentSongLyrics, songLyricHint))
+              }
+            }}> Next</Button> */}
+          </VStack>}
 
         <Text fontWeight={"bold"}>Hints</Text>
         {!hint && (
